@@ -1,0 +1,6 @@
+replace:
+  signs: true
+  chat: true
+
+# If true, will check for easy_sprites.replace.signs and easy_sprites.replace.chat
+permission: false

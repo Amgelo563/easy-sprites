@@ -1,0 +1,10 @@
+name: EasySprites
+description: $description
+prefix: EasySprites
+version: '${version}'
+
+main: me.amgelo563.easy_sprites.EasySprites
+api-version: '1.21.9'
+load: STARTUP
+
+authors: [ Amgelo563 ]
