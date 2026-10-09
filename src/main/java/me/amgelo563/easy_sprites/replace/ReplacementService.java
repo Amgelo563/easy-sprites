@@ -49,7 +49,7 @@ public class ReplacementService {
         String finalPermission = this.permission == null
                 ? null
                 : this.permission + "." + suffix;
-        return finalPermission == null || source.hasPermission(finalPermission);
+        return finalPermission != null && source.hasPermission(finalPermission);
     }
 
     // lower level interface that actually does the replacing
