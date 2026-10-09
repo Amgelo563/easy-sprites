@@ -1,6 +1,6 @@
 # 🖼️ `easy-sprites`
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/Amgelo563/easy-sprites/build.yml?style=for-the-badge&logo=github)](https://github.com/Amgelo563/javalens-bot/actions/workflows/build.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Amgelo563/easy-sprites/build.yml?style=for-the-badge&logo=github)](https://github.com/Amgelo563/easy-sprites/actions/workflows/build.yml)
 [![Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/easy-sprites)
 
 A PaperMC plugin to let players easily send sprite textures in signs and chat. Supports 1.21.9 (where the object sprite
