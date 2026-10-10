@@ -208,6 +208,10 @@ public final class MC {
     public static final MC
             V_26_2  = ver(26, 2).rev(1).data(4903).protocol(776).resource(88.0f, 107.1f);
 
+    // Wilderness Bound
+    public static final MC
+            V_26_3  = ver(26, 3).rev(1).data(5023).protocol(777).resource(97.1f, 121.0f);
+
     @NotNull
     private static MC ver(int major, int feature) {
         return new MC(major, feature);
