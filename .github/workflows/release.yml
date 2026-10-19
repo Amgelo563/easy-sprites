@@ -3,10 +3,11 @@ name: Release
 on:
   workflow_dispatch:
     inputs:
-      dry-run:
-        description: Don't tag or release
-        type: boolean
-        default: false
+      mode:
+        description: Release mode
+        type: choice
+        options: [ normal, dry-run, draft ]
+        default: normal
 
 concurrency:
   group: release
@@ -30,6 +31,9 @@ jobs:
           java-version: 21
           cache: gradle
 
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
       - name: Test
         run: ./gradlew check
 
@@ -42,11 +46,11 @@ jobs:
           output-file: 'false'
           skip-version-file: true
           skip-commit: true
-          skip-tag: ${{ inputs.dry-run }}
+          skip-tag: ${{ inputs.mode == 'dry-run' }}
           skip-on-empty: true
 
-      - name: Dry run
-        if: inputs.dry-run && steps.changelog.outputs.skipped != 'true'
+      - name: Dry run summary
+        if: inputs.mode == 'dry-run' && steps.changelog.outputs.skipped != 'true'
         env:
           VERSION: ${{ steps.changelog.outputs.version }}
           NOTES: ${{ steps.changelog.outputs.clean_changelog }}
@@ -58,16 +62,18 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Build release artifacts
-        if: steps.changelog.outputs.skipped != 'true' && !inputs.dry-run
+        if: steps.changelog.outputs.skipped != 'true' && inputs.mode != 'dry-run'
         run: ./gradlew assemble -Pversion=${{ steps.changelog.outputs.version }}
 
       - name: Create GitHub release
-        if: steps.changelog.outputs.skipped != 'true' && !inputs.dry-run
+        if: steps.changelog.outputs.skipped != 'true' && inputs.mode != 'dry-run'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.changelog.outputs.tag }}
           NOTES: ${{ steps.changelog.outputs.clean_changelog }}
+          DRAFT_FLAG: ${{ inputs.mode == 'draft' && '--draft' || '' }}
         run: |
           gh release create "$TAG" build/libs/*.jar \
             --title "$TAG" \
-            --notes "$NOTES"
+            --notes "$NOTES" \
+            $DRAFT_FLAG
