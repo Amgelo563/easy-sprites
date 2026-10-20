@@ -20,6 +20,9 @@ jobs:
   release:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.changelog.outputs.skipped != 'true' && inputs.mode == 'normal' }}
+      tag: ${{ steps.changelog.outputs.tag }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -77,3 +80,13 @@ jobs:
             --title "$TAG" \
             --notes "$NOTES" \
             $DRAFT_FLAG
+
+  run-publish:
+    needs: release
+    if: needs.release.outputs.released == 'true'
+    uses: ./.github/workflows/publish.yml
+    with:
+      tag: ${{ needs.release.outputs.tag }}
+    secrets: inherit
+    permissions:
+      contents: read

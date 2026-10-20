@@ -1,34 +1,62 @@
-name: Publish to Modrinth after release
+name: Publish to Modrinth
 
 on:
+  # called by release.yml
+  workflow_call:
+    inputs:
+      tag:
+        description: Existing release tag (eg. v1.2.3)
+        required: true
+        type: string
+
+  # for failed runs
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (eg. v1.2.3)
+        required: true
+        type: string
+
+  # for draft releases
   release:
     types: [ published ]
 
 jobs:
   modrinth:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
     steps:
-      - uses: actions/checkout@v5
+      - name: Resolve version
+        run: echo "VERSION=${TAG#v}" >> "$GITHUB_ENV"
 
-      - uses: actions/setup-java@v5
+      - name: Get release (notes) for the tag
+        id: release
+        uses: cardinalby/git-get-release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         with:
-          distribution: temurin
-          java-version: 21
-          cache: gradle
+          tag: ${{ env.TAG }}
 
-      - name: Build
-        run: ./gradlew assemble -Pversion=${{ github.event.release.tag_name }}
+      - name: Download jar from the GitHub release
+        uses: robinraju/release-downloader@v1
+        with:
+          tag: ${{ env.TAG }}
+          fileName: easy-sprites-${{ env.VERSION }}.jar
+          out-file-path: dist
 
       - name: Upload to Modrinth
         uses: cloudnode-pro/modrinth-publish@v2
         with:
           token: ${{ secrets.MODRINTH_TOKEN }}
           project: ONslA6FK
-          name: ${{ github.event.release.name }}
-          version: ${{ github.event.release.tag_name }}
-          changelog: ${{ github.event.release.body }}
+          name: ${{ env.TAG }}
+          version: ${{ env.VERSION }}
+          changelog: ${{ steps.release.outputs.body }}
           loaders: |-
             paper
             purpur
           game-versions: '>=1.21.9'
-          files: build/libs/easy-sprites-${{ github.event.release.tag_name }}.jar
+          files: dist/easy-sprites-${{ env.VERSION }}.jar
